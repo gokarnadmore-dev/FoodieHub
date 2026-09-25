@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Orders</title>
+    <style>
+        /* Base Reset & Layout */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        body { display: flex; height: 100vh; overflow: hidden; background-color: #f7f9fc; color: #333; }
+
+        /* Sidebar */
+        .sidebar { width: 220px; background-color: #ff6a19; color: white; padding: 20px 0; flex-shrink: 0; }
+        .sidebar h2 { padding: 0 20px; font-size: 1.25rem; margin-bottom: 25px; font-weight: 700; }
+        .sidebar ul { list-style: none; }
+        .sidebar ul li { padding: 0; margin: 4px 12px; border-radius: 6px; }
+        .sidebar ul li a { display: block; padding: 12px 20px; color: rgba(255, 255, 255, 0.9); text-decoration: none; font-size: 0.9rem; border-left: 3px solid transparent; }
+        .sidebar ul li:hover { background-color: rgba(255, 255, 255, 0.15); }
+        .sidebar ul li a:hover { color: white; }
+        .sidebar ul li.active { background-color: rgba(255, 255, 255, 0.25); }
+        .sidebar ul li.active a { color: white; font-weight: 600; border-left-color: white; }
+
+        /* Main Content */
+        .main-content { flex-grow: 1; padding: 25px 35px; overflow-y: auto; }
+
+        /* Header */
+        .main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .main-header h1 { font-size: 1.5rem; color: #333; font-weight: 700; }
+        .live-status { color: #28a745; display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 500; }
+        .live-status::before { content: ''; display: inline-block; width: 8px; height: 8px; background-color: #28a745; border-radius: 50%; }
+
+        /* Stat Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px 24px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
+        .stat-card h3 { color: #555; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; }
+        .stat-card p { font-size: 1.8rem; font-weight: 700; color: #ff6a19; }
+
+        /* Form & Section Container */
+        .section-container { margin-bottom: 25px; }
+        .section-header { margin-bottom: 15px; }
+        .section-header h2 { font-size: 1.25rem; color: #333; font-weight: 700; }
+
+        .add-order-card { background: white; padding: 20px 24px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
+        .add-order-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 15px; align-items: center; }
+        .add-order-form input { 
+            padding: 10px 14px; 
+            border: 1px solid #e1e5eb; 
+            border-radius: 6px; 
+            font-size: 0.85rem; 
+            outline: none;
+            width: 100%;
+            background-color: #fff;
+        }
+        .add-order-form input:focus { border-color: #ff6a19; }
+        .add-order-btn { 
+            background-color: #ff6a19; 
+            color: white; 
+            padding: 10px 32px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 0.85rem; 
+            white-space: nowrap;
+            transition: background-color 0.2s;
+        }
+        .add-order-btn:hover { background-color: #e65c15; }
+
+        /* Orders Table */
+        .table-wrapper { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        thead { background-color: #ff6a19; color: white; }
+        th, td { text-align: left; padding: 14px 20px; border-bottom: 1px solid #f0f0f0; }
+        th { font-weight: 600; font-size: 0.85rem; }
+        tr:last-child td { border-bottom: none; }
+        
+        .order-id { font-weight: 700; color: #222; }
+        .customer-name { font-weight: 600; color: #333; }
+        .items-list { color: #555; }
+        .order-total { font-weight: 600; color: #222; }
+        .payment-method { display: inline-block; font-weight: 600; color: #444; }
+        .payment-status { margin-top: 4px; font-size: 0.72rem; color: #555; }
+        .order-date { color: #666; font-size: 0.8rem; }
+
+        /* Dynamic Status Dropdowns */
+        .status-select { 
+            padding: 5px 10px; 
+            border-radius: 14px; 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+            border: 1px solid transparent; 
+            outline: none;
+            cursor: pointer;
+        }
+        .status-select.placed { background-color: #fff3cd; color: #856404; border-color: #ffeeba; }
+        .status-select.processing { background-color: #cce5ff; color: #004085; border-color: #b8daff; }
+        .status-select.shipped { background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+        .status-select.delivered { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .status-select.cancelled { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+
+        /* Action Buttons */
+        .btn-delete { 
+            background-color: #e74c3c; 
+            color: white; 
+            padding: 6px 14px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+            transition: opacity 0.2s;
+        }
+        .btn-delete:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <h2>Admin Panel</h2>
+        <ul>
+            <li><a href="admindashbord.html">Dashboard</a></li>
+            <li><a href="users.html">Users</a></li>
+            <li class="active"><a href="orders.html">Orders</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="admindashbordcatering.html">Catering</a></li>
+            <li><a href="login.html" onclick="logoutUser(); return false;">Logout</a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <header class="main-header">
+            <h1>Orders</h1>
+            <div class="live-status">Live — synced across all pages</div>
+        </header>
+
+        <!-- Stats Section -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Orders</h3>
+                <p id="totalOrdersCount">—</p>
+            </div>
+            <div class="stat-card">
+                <h3>Revenue</h3>
+                <p id="revenueTotal">—</p>
+            </div>
+            <div class="stat-card">
+                <h3>Pending</h3>
+                <p id="pendingOrdersCount">—</p>
+            </div>
+        </section>
+
+        <!-- All Orders Table Section -->
+        <section class="section-container">
+            <div class="section-header">
+                <h2>All Orders</h2>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Payment</th>
+                            <th>Status</th>
+                            <th>Placed</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <!-- Order rows will be populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script src="assets/app.js"></script>
+    <script>
+        const session = requireAdmin();
+
+        // Orders keyed by _id — lets a live socket event patch one row
+        // instead of re-fetching and re-rendering everything.
+        let ordersById = {};
+
+        const STATUSES = ["Placed", "Processing", "Shipped", "Delivered", "Cancelled"];
+
+        const ordersTableBody = document.getElementById("ordersTableBody");
+        const totalOrdersCountEl = document.getElementById("totalOrdersCount");
+        const revenueTotalEl = document.getElementById("revenueTotal");
+        const pendingOrdersCountEl = document.getElementById("pendingOrdersCount");
+
+        function statusClass(status) {
+            return (status || "placed").toLowerCase().replace(/\s+/g, "-");
+        }
+
+        function updateSummaryStats(orders) {
+            const totalOrders = orders.length;
+            const revenue = orders.reduce((sum, o) => sum + Number(o.totalAmount || 0), 0);
+            const pendingCount = orders.filter(o =>
+                o.orderStatus !== "Delivered" && o.orderStatus !== "Cancelled"
+            ).length;
+
+            totalOrdersCountEl.textContent = totalOrders;
+            revenueTotalEl.textContent = `₹${revenue}`;
+            pendingOrdersCountEl.textContent = pendingCount;
+        }
+
+        function renderRow(order) {
+            const customerName = order.user?.name || order.shippingAddress?.name || "Customer";
+            const itemsText = (order.items || []).map(i => `${i.name} x${i.quantity}`).join(", ");
+            const placed = order.createdAt ? new Date(order.createdAt).toLocaleString() : "";
+            const status = order.orderStatus || "Placed";
+
+            const paymentMethod = order.paymentMethod || "COD";
+            const paymentStatus = order.paymentStatus || (paymentMethod === "ONLINE" ? "Paid" : "Pending");
+            const paymentLabels = {
+                COD: "Cash on Delivery",
+                UPI: "UPI / QR Payment",
+                CARD: "Credit or Debit Card",
+                NETBANKING: "Net Banking",
+                WALLET: "Digital Wallet"
+            };
+
+            return `
+                <tr id="order-row-${order._id}">
+                    <td class="order-id">#${order._id.slice(-6)}</td>
+                    <td class="customer-name">${customerName}</td>
+                    <td class="items-list">${itemsText}</td>
+                    <td class="order-total">₹${order.totalAmount}</td>
+                    <td>
+                        <span class="payment-method">${paymentLabels[paymentMethod] || paymentMethod}</span>
+                        <div class="payment-status">${paymentStatus}</div>
+                    </td>
+                    <td>
+                        <select class="status-select ${statusClass(status)}" onchange="changeStatus('${order._id}', this.value)">
+                            ${STATUSES.map(s => `<option value="${s}" ${s === status ? "selected" : ""}>${s}</option>`).join("")}
+                        </select>
+                    </td>
+                    <td class="order-date">${placed}</td>
+                    <td>
+                        <button class="btn-delete" onclick="changeStatus('${order._id}', 'Cancelled')">Cancel</button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function renderOrdersTable() {
+            const orders = Object.values(ordersById)
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            ordersTableBody.innerHTML = orders.length
+                ? orders.map(renderRow).join("")
+                : `<tr><td colspan="7" style="text-align:center;color:#888;padding:20px;">No orders yet</td></tr>`;
+
+            updateSummaryStats(orders);
+        }
+
+        async function loadOrders() {
+            const orders = await getOrders(); // GET /api/order/admin/all
+            ordersById = {};
+            orders.forEach(o => { ordersById[o._id] = o; });
+            renderOrdersTable();
+        }
+
+        async function changeStatus(orderId, newStatus) {
+            try {
+                const { order } = await updateOrderStatus(orderId, newStatus);
+                ordersById[order._id] = order;
+                renderOrdersTable();
+                // Note: the server also broadcasts "order:status" to this
+                // admin room, so other open admin tabs update too.
+            } catch (err) {
+                alert(err.message || "Could not update order status");
+            }
+        }
+
+        // Real-time: new orders and status changes (from this tab, other
+        // admin tabs, or customers cancelling their own order) land here
+        // instantly via Socket.IO instead of needing a refresh.
+        function setupLiveOrders() {
+            const socket = connectSocket();
+            if (!socket) return;
+
+            socket.on("order:new", (order) => {
+                ordersById[order._id] = order;
+                renderOrdersTable();
+            });
+
+            socket.on("order:status", (order) => {
+                ordersById[order._id] = order;
+                renderOrdersTable();
+            });
+        }
+
+        loadOrders();
+        setupLiveOrders();
+    </script>
+</body>
+</html>

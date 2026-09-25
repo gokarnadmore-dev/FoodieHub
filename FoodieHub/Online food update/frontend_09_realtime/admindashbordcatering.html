@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Catering Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background: #f7f9fc;
+            color: #333;
+        }
+
+        .sidebar {
+            width: 220px;
+            background-color: #ff6a19;
+            color: white;
+            padding: 20px 0;
+            flex-shrink: 0;
+        }
+
+        .sidebar h2 {
+            padding: 0 20px;
+            font-size: 1.25rem;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar ul li {
+            padding: 0;
+            margin: 4px 12px;
+            border-radius: 6px;
+        }
+
+        .sidebar ul li a {
+            display: block;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            font-size: 0.9rem;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar ul li a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .sidebar ul li.active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar ul li.active a {
+            color: white;
+            border-left-color: white;
+            font-weight: 500;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 25px 35px;
+            overflow-y: auto;
+        }
+
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .main-header h1 {
+            font-size: 1.5rem;
+            color: #333;
+            font-weight: 700;
+        }
+
+        .live-status {
+            color: #28a745;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .live-status::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #28a745;
+            border-radius: 50%;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px 24px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        .stat-card h3 {
+            color: #555;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ff6a19;
+        }
+
+        .section-container {
+            margin-bottom: 25px;
+        }
+
+        .section-header {
+            margin-bottom: 15px;
+        }
+
+        .section-header h2 {
+            font-size: 1.25rem;
+            color: #333;
+            font-weight: 700;
+        }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        thead {
+            background-color: #ff6a19;
+            color: white;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 14px 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        th {
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .request-id {
+            font-weight: 700;
+            color: #222;
+        }
+
+        .status-pill {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .status-pill.pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-pill.confirmed {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+
+        .status-pill.completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-pill.cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-select {
+            padding: 6px 10px;
+            border-radius: 14px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid transparent;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .status-select.pending { background-color: #fff3cd; color: #856404; border-color: #ffeeba; }
+        .status-select.confirmed { background-color: #cce5ff; color: #004085; border-color: #b8daff; }
+        .status-select.completed { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .status-select.cancelled { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+
+        .action-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .empty {
+            text-align: center;
+            color: #888;
+            padding: 24px;
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <h2>Admin Panel</h2>
+        <ul>
+            <li><a href="admindashbord.html">Dashboard</a></li>
+            <li><a href="users.html">Users</a></li>
+            <li><a href="orders.html">Orders</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li class="active"><a href="admindashbordcatering.html">Catering</a></li>
+            <li><a href="login.html" onclick="logoutUser(); return false;">Logout</a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <header class="main-header">
+            <h1>Catering Dashboard</h1>
+            <div class="live-status">Live — synced across all pages</div>
+        </header>
+
+        <section class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Requests</h3>
+                <p id="totalRequests">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Pending</h3>
+                <p id="pendingRequests">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Confirmed</h3>
+                <p id="confirmedRequests">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Completed</h3>
+                <p id="completedRequests">0</p>
+            </div>
+        </section>
+
+        <section class="section-container">
+            <div class="section-header">
+                <h2>All Catering Requests</h2>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Request ID</th>
+                            <th>Customer</th>
+                            <th>Event</th>
+                            <th>Guests</th>
+                            <th>Package</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cateringTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script src="assets/app.js"></script>
+    <script>
+        const session = requireAdmin();
+        const tableBody = document.getElementById('cateringTableBody');
+
+        const totalRequestsEl = document.getElementById('totalRequests');
+        const pendingRequestsEl = document.getElementById('pendingRequests');
+        const confirmedRequestsEl = document.getElementById('confirmedRequests');
+        const completedRequestsEl = document.getElementById('completedRequests');
+
+        let requestsById = {};
+
+        function renderStats(requests) {
+            const total = requests.length;
+            const pending = requests.filter(r => (r.status || 'Pending') === 'Pending').length;
+            const confirmed = requests.filter(r => (r.status || 'Pending') === 'Confirmed').length;
+            const completed = requests.filter(r => (r.status || 'Pending') === 'Completed').length;
+
+            totalRequestsEl.textContent = total;
+            pendingRequestsEl.textContent = pending;
+            confirmedRequestsEl.textContent = confirmed;
+            completedRequestsEl.textContent = completed;
+        }
+
+        function renderRow(request) {
+            const status = request.status || 'Pending';
+            return `
+                <tr id="request-row-${request._id}">
+                    <td class="request-id">#${String(request._id || '').slice(-6)}</td>
+                    <td>${request.contactName || request.name || 'Customer'}</td>
+                    <td>${request.eventType || 'Event'}</td>
+                    <td>${request.guestCount || 0}</td>
+                    <td>${request.packageName || request.package || 'Standard'}</td>
+                    <td>${request.eventDate ? new Date(request.eventDate).toLocaleDateString() : 'N/A'}</td>
+                    <td>
+                        <span class="status-pill ${String(status).toLowerCase()}">${status}</span>
+                    </td>
+                    <td>
+                        <button class="action-btn" onclick="cancelCateringRequest('${request._id}')">Cancel</button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function renderTable() {
+            const requests = Object.values(requestsById).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+            renderStats(requests);
+
+            if (!requests.length) {
+                tableBody.innerHTML = '<tr><td colspan="8" class="empty">No catering requests yet.</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = requests.map(renderRow).join('');
+        }
+
+        async function loadCateringRequests() {
+            try {
+                const requests = await getCateringRequests();
+                requestsById = {};
+                requests.forEach(r => { requestsById[r._id] = r; });
+                renderTable();
+            } catch (err) {
+                console.error('Unable to load catering requests:', err);
+                tableBody.innerHTML = '<tr><td colspan="8" class="empty">Unable to load requests.</td></tr>';
+            }
+        }
+
+        async function cancelCateringRequest(id) {
+            try {
+                if (!confirm('Cancel this catering request?')) return;
+                await updateCateringRequestStatus(id, 'Cancelled');
+                const request = requestsById[id];
+                if (request) {
+                    request.status = 'Cancelled';
+                    renderTable();
+                }
+            } catch (err) {
+                alert(err.message || 'Could not cancel request');
+            }
+        }
+
+        function setupLiveCatering() {
+            const socket = connectSocket();
+            if (!socket) return;
+
+            socket.on('catering:new', (request) => {
+                requestsById[request._id] = request;
+                renderTable();
+            });
+
+            socket.on('catering:updated', (request) => {
+                requestsById[request._id] = request;
+                renderTable();
+            });
+        }
+
+        loadCateringRequests();
+        setupLiveCatering();
+    </script>
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodieHub Profile</title>
+
+    <style>
+* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Background */
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #aa8570, #a1722e, #a56e7b, #382042);
+            background-size: 400% 400%;
+            animation: bgAnimation 10s ease infinite;
+        }
+
+        @keyframes bgAnimation {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* NAVBAR */
+        nav {
+            background: linear-gradient(to right, #ff4b2b, #f39c12);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 50px;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .menu {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .menu a {
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* PROFILE */
+        .container {
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .profile-card {
+            width: 100%;
+            max-width: 550px;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .profile-pic-container {
+            position: relative;
+            width: 120px;
+            margin: auto;
+        }
+
+        .profile-pic-container img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #ff5722;
+        }
+
+        .edit-icon {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: #ff5722;
+            color: white;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        h1 {
+            margin: 15px 0;
+            color: #ff0000;
+        }
+
+        .info {
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .info p {
+            margin: 10px 0;
+        }
+
+        /* BUTTONS */
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            background: #ff5722;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* ORDER BOX */
+        #orderBox {
+            display: none;
+            position: fixed;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .order-item {
+            border-bottom: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+</style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="logo">🍔 FoodieHub</div>
+
+        <div class="menu">
+            <a href="index.html">Home</a>
+            <a href="menu.html">Menu</a>
+            <a href="suggest item.html">Suggest Item</a>
+            <a href="cart.html">Cart</a>
+            <a href="checkout.html">Checkout</a>
+            <a href="history.html">History</a>
+            <a href="profile.html">Profile</a>
+            <a href="logout.html" onclick="logoutUser(); return false;">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <div class="profile-card">
+
+            <div class="profile-pic-container">
+                <img id="profileImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Ccircle cx='60' cy='60' r='60' fill='%23f0e4d7'/%3E%3Ccircle cx='60' cy='45' r='22' fill='%23ff7043'/%3E%3Cellipse cx='60' cy='100' rx='35' ry='25' fill='%23ff7043'/%3E%3C/svg%3E" alt="Profile">
+                <label for="imageUpload" class="edit-icon">✏️</label>
+                <input type="file" id="imageUpload" hidden onchange="uploadImage(event)">
+            </div>
+
+            <h1>User Profile</h1>
+
+            <div class="info" id="info">
+                <p><b>Name:</b> <span id="name"></span></p>
+                <p><b>Email:</b> <span id="email"></span></p>
+                <p><b>Mobile:</b> <span id="mobile"></span></p>
+                <p><b>Address:</b> <span id="address"></span></p>
+                <p><b>Total Orders:</b> <span id="totalOrders">0</span></p> <!-- ← add this -->
+            </div>
+
+            <button onclick="editProfile()">Edit Profile</button>
+            <button onclick="showOrders()">View Orders</button> <!-- ← you had no trigger for showOrders! -->
+
+            <!-- <button onclick="editProfile()">Edit Profile</button> -->
+
+        </div>
+
+    </div>
+
+    <!-- ORDER POPUP -->
+    <div id="orderBox">
+        <h2>📦 Your Orders</h2>
+        <div id="orderList"></div>
+        <button onclick="closeOrders()">Close</button>
+    </div>
+
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script src="assets/app.js"></script>
+    <script>
+        // This page is for logged-in customers only.
+        const session = requireLogin();
+        if (!session) {
+            window.location.href = "login.html";
+        }
+        let userProfile = null;
+
+        async function loadProfile() {
+            try {
+                userProfile = await getProfile();
+                document.getElementById("name").innerText = userProfile.name;
+                document.getElementById("email").innerText = userProfile.email;
+                document.getElementById("mobile").innerText = userProfile.contact || "—";
+                document.getElementById("address").innerText = userProfile.address || "—";
+                if (userProfile.profileImage) {
+                    document.getElementById("profileImage").src = userProfile.profileImage;
+                }
+            } catch (err) {
+                console.error("Failed to load profile:", err);
+            }
+        }
+
+        function setupLiveProfile() {
+            const socket = connectSocket();
+            if (!socket) return;
+
+            socket.on("user:updated", (updatedUser) => {
+                userProfile = { ...userProfile, ...updatedUser };
+                document.getElementById("name").innerText = userProfile.name;
+                document.getElementById("email").innerText = userProfile.email;
+                document.getElementById("mobile").innerText = userProfile.contact || "—";
+                document.getElementById("address").innerText = userProfile.address || "—";
+                if (userProfile.profileImage) {
+                    document.getElementById("profileImage").src = userProfile.profileImage;
+                }
+            });
+        }
+
+        // IMAGE UPLOAD
+        async function uploadImage(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = async function (e) {
+                const base64Image = e.target.result;
+                document.getElementById("profileImage").src = base64Image;
+                try {
+                    await updateProfile({ profileImage: base64Image });
+                } catch (err) {
+                    console.error("Failed to save image", err);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // EDIT PROFILE
+        async function editProfile() {
+            if (!userProfile) return;
+            const name = prompt("Name", userProfile.name);
+            const email = prompt("Email", userProfile.email);
+            const contact = prompt("Mobile", userProfile.contact || "");
+            const address = prompt("Address", userProfile.address || "");
+
+            if (name && email) {
+                try {
+                    await updateProfile({ name, email, phone: contact, address });
+                    await loadProfile();
+                    alert("Updated!");
+                } catch (err) {
+                    alert("Update failed: " + err.message);
+                }
+            }
+        }
+
+        // SHOW ORDERS POPUP
+        async function showOrders() {
+            try {
+                const orders = await getMyOrders();
+                
+                const list = document.getElementById("orderList");
+                list.innerHTML = "";
+
+                if (orders.length === 0) {
+                    list.innerHTML = "<p>No orders found.</p>";
+                } else {
+                    orders.forEach(order => {
+                        list.innerHTML += `
+                        <div class="order-item">
+                            <p><b>ID:</b> #${order._id.slice(-6)}</p>
+                            <p><b>Total:</b> ₹${order.totalAmount}</p>
+                            <p><b>Status:</b> ${order.orderStatus || "Placed"}</p>
+                            <p><b>Date:</b> ${new Date(order.createdAt).toLocaleString() || "—"}</p>
+                        </div>`;
+                    });
+                }
+
+                document.getElementById("orderBox").style.display = "block";
+            } catch (err) {
+                console.error("Failed to load orders:", err);
+            }
+        }
+
+        function closeOrders() {
+            document.getElementById("orderBox").style.display = "none";
+        }
+
+        async function init() {
+            await loadProfile();
+            setupLiveProfile();
+            try {
+                const myOrders = await getMyOrders();
+                document.getElementById("totalOrders").innerText = myOrders.length;
+            } catch(e) {}
+        }
+        
+        window.onload = init;
+    </script>
+
+</body>
+</html>

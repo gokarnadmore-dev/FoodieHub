@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>FoodieHub Register</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:linear-gradient(135deg,#ff5722,#ff9800);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+
+.register-box{
+
+    width:400px;
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 5px 20px rgba(0,0,0,.3);
+
+}
+
+
+h2{
+
+text-align:center;
+color:#ff5722;
+margin-bottom:20px;
+
+}
+
+
+input{
+
+width:100%;
+padding:12px;
+margin:10px 0;
+border-radius:8px;
+border:1px solid #ccc;
+font-size:15px;
+
+}
+
+
+button{
+
+width:100%;
+padding:12px;
+background:#ff5722;
+color:white;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-size:16px;
+
+}
+
+
+button:hover{
+
+background:#e64a19;
+
+}
+
+button:disabled{
+
+background:#ffab91;
+cursor:not-allowed;
+
+}
+
+
+p{
+
+margin-top:15px;
+text-align:center;
+
+}
+
+
+a{
+
+color:#ff5722;
+
+}
+
+.toast{
+
+position:fixed;
+top:20px;
+left:50%;
+transform:translateX(-50%) translateY(-20px);
+background:#2ecc71;
+color:white;
+padding:12px 24px;
+border-radius:8px;
+font-weight:bold;
+z-index:9999;
+opacity:0;
+transition:opacity .25s ease, transform .25s ease;
+box-shadow:0 4px 14px rgba(0,0,0,.2);
+
+}
+
+.toast.show{
+
+opacity:1;
+transform:translateX(-50%) translateY(0);
+
+}
+
+.toast.error{
+
+background:#e74c3c;
+
+}
+</style>
+
+</head>
+
+
+<body>
+
+
+<a href="index.html">
+<button style="position:absolute;top:20px;left:20px;width:100px;">
+Home
+</button>
+</a>
+
+
+
+<div class="register-box">
+
+
+<h2>🍔 FoodieHub Register</h2>
+
+
+
+<input 
+type="text"
+id="name"
+placeholder="Full Name">
+
+
+
+<input
+type="email"
+id="email"
+placeholder="Email">
+
+
+
+<input
+type="tel"
+id="contact"
+placeholder="Phone Number"
+inputmode="numeric"
+maxlength="10"
+pattern="[0-9]{10}"
+oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,10)">
+
+
+
+<input
+type="password"
+id="password"
+placeholder="Password">
+
+
+
+<button id="registerBtn" onclick="register()">
+Register
+</button>
+
+
+<p>
+Already have an account?
+<a href="login.html">Login</a>
+</p>
+
+
+
+</div>
+
+
+<script src="assets/app.js"></script>
+<script>
+
+// Non-blocking toast so it never delays the redirect
+function showToast(message, isError = false){
+
+    const toast = document.createElement("div");
+    toast.className = "toast" + (isError ? " error" : "");
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // trigger fade-in
+    requestAnimationFrame(() => toast.classList.add("show"));
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 250);
+    }, 2000);
+
+}
+
+
+
+
+async function register(){
+
+
+    const name =
+    document.getElementById("name").value.trim();
+
+
+    const email =
+    document.getElementById("email").value.trim();
+
+    const contact =
+    document.getElementById("contact").value.trim();
+
+    if (!/^\d{10}$/.test(contact)) {
+        showToast("Phone number must contain only digits and be exactly 10 characters", true);
+        return;
+    }
+
+    const password =
+    document.getElementById("password").value.trim();
+
+
+
+    // frontend check
+
+    if(
+        name === "" ||
+        email === "" ||
+        contact === "" ||
+        password === ""
+    ){
+
+        showToast("Name, email, phone number and password are required", true);
+        return;
+
+    }
+
+    if (!/^\d{10}$/.test(contact)) {
+        showToast("Phone number must be exactly 10 digits", true);
+        return;
+    }
+
+
+    const registerBtn = document.getElementById("registerBtn");
+    registerBtn.disabled = true;
+    registerBtn.textContent = "Registering...";
+
+
+    try {
+
+        const res = await fetch(`${API_BASE}/auth/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email, password, contact })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            showToast(data.message || "Registration failed", true);
+            registerBtn.disabled = false;
+            registerBtn.textContent = "Register";
+            return;
+        }
+
+        showToast("Registration successful!");
+
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 600);
+
+    } catch (err) {
+
+        showToast("Could not reach server. Is the backend running?", true);
+        registerBtn.disabled = false;
+        registerBtn.textContent = "Register";
+
+    }
+
+}
+
+
+
+</script>
+
+
+
+</body>
+
+</html>

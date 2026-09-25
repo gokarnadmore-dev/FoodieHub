@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order History - FoodieHub</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#fff7ed;
+}
+
+/* NAVBAR */
+nav{
+    background:linear-gradient(90deg,#ff512f,#f09819);
+    padding:18px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    color:white;
+    flex-wrap:wrap;
+}
+
+nav h2{
+    font-size:24px;
+}
+
+.menu a{
+    color:white;
+    text-decoration:none;
+    margin:0 10px;
+    font-weight:bold;
+}
+
+.menu a:hover{
+    text-decoration:underline;
+}
+
+/* CONTAINER */
+.container{
+    padding:30px;
+    display:flex;
+    justify-content:center;
+}
+
+/* CARD */
+.card{
+    width:95%;
+    max-width:1100px;
+    background:white;
+    border-radius:15px;
+    padding:25px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* TITLE */
+.title{
+    text-align:center;
+    font-size:22px;
+    font-weight:bold;
+    color:#ff512f;
+    margin-bottom:20px;
+}
+
+.live-note{
+    text-align:center;
+    font-size:13px;
+    color:#2ecc71;
+    font-weight:bold;
+    margin-bottom:15px;
+}
+
+/* TABLE */
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#ff512f;
+    color:white;
+    padding:14px;
+}
+
+td{
+    text-align:center;
+    padding:14px;
+    border-bottom:1px solid #eee;
+}
+
+.empty{
+    text-align:center;
+    color:gray;
+    padding:20px;
+}
+
+/* STATUS */
+.status{
+    padding:6px 12px;
+    border-radius:20px;
+    color:white;
+    font-size:13px;
+}
+
+.status.pending         { background: orange; }
+.status.placed          { background: #6c757d; }
+.status.processing      { background: #0c5460; }
+.status.preparing       { background: #0c5460; }
+.status.shipped         { background: #004085; }
+.status.out-for-delivery{ background: #004085; }
+.status.delivered       { background: green; }
+.status.cancelled       { background: red; }
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav>
+    <h2>🍔 FoodieHub</h2>
+
+    <div class="menu">
+        <a href="index.html">Home</a>
+        <a href="menu.html">Menu</a>
+        <a href="suggest item.html">Suggest Item</a>
+        <a href="cart.html">Cart</a>
+        <a href="checkout.html">Checkout</a>
+        <a href="history.html">History</a>
+        <a href="profile.html">Profile</a>
+        <a href="logout.html" onclick="logoutUser(); return false;">Logout</a>
+    </div>
+</nav>
+
+<!-- HISTORY -->
+<div class="container">
+
+    <div class="card">
+
+        <div class="title">📜 Order History</div>
+        <p class="live-note">● Live — new orders and status changes from the admin appear here instantly</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Food Items</th>
+                    <th>Total</th>
+                    <th>Date & Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody id="historyData"></tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script src="assets/app.js"></script>
+<script>
+
+    const session = requireLogin();
+    if (!session) {
+        window.location.href = "login.html";
+    }
+    const historyBox = document.getElementById("historyData");
+
+    // Orders currently on screen, keyed by _id, so a live status event
+    // can patch a single row instead of re-fetching the whole list.
+    let ordersById = {};
+
+    function renderRow(order) {
+        const foodNames = order.items.map(item => `${item.name} x${item.quantity}`).join(", ");
+        const status = order.orderStatus || "Placed";
+        const statusClass = status.toLowerCase().replace(/\s+/g, "-");
+        const paymentMethod = order.paymentMethod || "COD";
+        const paymentStatus = order.paymentStatus || (paymentMethod === "ONLINE" ? "Paid" : "Pending");
+        const paymentLabels = {
+            COD: "Cash on Delivery",
+            UPI: "UPI / QR Payment",
+            CARD: "Credit or Debit Card",
+            NETBANKING: "Net Banking",
+            WALLET: "Digital Wallet"
+        };
+
+        return `
+        <tr id="order-row-${order._id}">
+            <td>#${order._id.slice(-6)}</td>
+            <td>${session.name || "Customer"}</td>
+            <td>${foodNames}</td>
+            <td>₹${order.totalAmount}</td>
+            <td>
+                <div>${paymentLabels[paymentMethod] || paymentMethod}</div>
+                <small>${paymentStatus}</small>
+            </td>
+            <td>${new Date(order.createdAt).toLocaleString()}</td>
+            <td><span class="status ${statusClass}">${status}</span></td>
+        </tr>`;
+    }
+
+    function renderHistory() {
+        const orders = Object.values(ordersById)
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        if (orders.length === 0) {
+            historyBox.innerHTML = `
+            <tr>
+                <td colspan="6" class="empty">No Orders Found 🛒</td>
+            </tr>`;
+            return;
+        }
+
+        historyBox.innerHTML = orders.map(renderRow).join("");
+    }
+
+    async function loadHistory() {
+        const orders = await getMyOrders();
+        ordersById = {};
+        orders.forEach(o => { ordersById[o._id] = o; });
+        renderHistory();
+    }
+
+    // Live updates: when the admin changes this order's status, patch
+    // it in place — no refresh, no re-fetch.
+    function setupLiveTracking() {
+        const socket = connectSocket();
+        if (!socket) return;
+
+        socket.on("order:status", (order) => {
+            if (!ordersById[order._id]) return; // not one of ours (shouldn't happen, room-scoped)
+            ordersById[order._id] = order;
+            renderHistory();
+        });
+    }
+
+    window.onload = () => {
+        loadHistory();
+        setupLiveTracking();
+    };
+
+</script>
+
+</body>
+</html>
