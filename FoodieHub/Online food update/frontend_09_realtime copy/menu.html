@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FoodieHub India</title>
+
+<style>
+/* RESET */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial;
+}
+
+/* BACKGROUND */
+body{
+    background:linear-gradient(-45deg,#ff4b2b,#ff9800,#ff416c,#a18cd1);
+    background-size:400% 400%;
+    animation:bg 12s ease infinite;
+    min-height:100vh;
+}
+
+/* NAVBAR */
+nav{
+    background:#ff5722;
+    padding:18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    color:white;
+}
+
+.logo{
+    font-size:25px;
+    font-weight:bold;
+}
+
+.menu a{
+    color:white;
+    text-decoration:none;
+    margin:0 10px;
+    font-weight:bold;
+}
+
+/* STATE SELECT */
+.topbar{
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    padding:15px 20px;
+    gap:12px;
+}
+
+.live-badge{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:13px;
+    color:white;
+    font-weight:bold;
+    background:rgba(0,0,0,0.2);
+    padding:6px 12px;
+    border-radius:20px;
+}
+
+.live-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#2ecc71;
+    animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(46,204,113,.6);}
+    70%{box-shadow:0 0 0 8px rgba(46,204,113,0);}
+    100%{box-shadow:0 0 0 0 rgba(46,204,113,0);}
+}
+
+select{
+    padding:12px;
+    width:220px;
+    border-radius:25px;
+    border:none;
+    outline:none;
+    font-size:14px;
+    cursor:pointer;
+    box-shadow:0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* TITLE */
+.title{
+    text-align:center;
+    color:white;
+    margin:10px;
+    font-size:28px;
+}
+
+/* SEARCH */
+.search{
+    text-align:center;
+    margin:10px;
+}
+
+.search input{
+    width:60%;
+    padding:12px;
+    border-radius:20px;
+    border:none;
+    outline:none;
+}
+
+/* GRID */
+.products{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+    gap:15px;
+    padding:15px;
+}
+
+/* CARD */
+.card{
+    background:white;
+    border-radius:15px;
+    padding:10px;
+    text-align:center;
+    box-shadow:0 5px 10px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.card img{
+    width:100%;
+    height:130px;
+    object-fit:cover;
+    border-radius:10px;
+    background:#eee;
+}
+
+.card h3{
+    font-size:15px;
+    margin:8px 0;
+}
+
+.card p{
+    color:green;
+    font-weight:bold;
+}
+
+button{
+    background:#ff5722;
+    color:white;
+    border:none;
+    padding:8px 15px;
+    border-radius:20px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:black;
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav>
+
+    <div class="logo">🍔 FoodieHub</div>
+
+    <div class="menu">
+        <a href="index.html">Home</a>
+        <a href="catering.html" onclick="if (!localStorage.getItem('fh_token')) { alert('Please login first to order items.'); window.location.href='login.html'; return false; }">Catering</a>
+        <a href="menu.html" onclick="if (!localStorage.getItem('fh_token')) { alert('Please login first to order items.'); window.location.href='login.html'; return false; }">Menu</a>
+        <a href="suggest item.html" onclick="if (!localStorage.getItem('fh_token')) { alert('Please login first to order items.'); window.location.href='login.html'; return false; }">Suggest Item</a>
+        <a href="cart.html" onclick="if (!localStorage.getItem('fh_token')) { alert('Please login first to order items.'); window.location.href='login.html'; return false; }">Cart</a>
+        <a href="checkout.html" onclick="if (!localStorage.getItem('fh_token')) { alert('Please login first to order items.'); window.location.href='login.html'; return false; }">Checkout</a>
+        <a href="history.html" onclick="if (!localStorage.getItem('fh_token')) { alert('Please login first to order items.'); window.location.href='login.html'; return false; }">History</a>
+        <a href="feedback.html" onclick="if (!localStorage.getItem('fh_token')) { alert('Please login first to order items.'); window.location.href='login.html'; return false; }">Feedback</a>
+        <a href="about.html">About Us</a>
+        <a href="profile.html" onclick="if (!localStorage.getItem('fh_token')) { alert('Please login first to order items.'); window.location.href='login.html'; return false; }">Profile</a>
+        <a href="logout.html">Logout</a>
+    </div>
+
+</nav>
+
+<!-- STATE SELECT -->
+<div class="topbar">
+
+<div class="live-badge"><span class="live-dot"></span> Live cart: <span id="liveCartCount">0</span></div>
+
+<select id="stateSelect" onchange="loadState()">
+
+<option value="Maharashtra">Maharashtra</option>
+<option value="Punjab">Punjab</option>
+<option value="Gujarat">Gujarat</option>
+<option value="Rajasthan">Rajasthan</option>
+<option value="Kerala">Kerala</option>
+<option value="Tamil Nadu">Tamil Nadu</option>
+<option value="Karnataka">Karnataka</option>
+<option value="West Bengal">West Bengal</option>
+<option value="Goa">Goa</option>
+
+</select>
+
+</div>
+
+<h1 class="title" id="title">Maharashtra Foods</h1>
+
+<div class="search">
+<input id="search" placeholder="Search food..." onkeyup="render()">
+</div>
+
+<div class="products" id="box"></div>
+
+<h1 class="title" style="margin-top: 40px; border-top: 2px solid #eee; padding-top: 20px;">Suggested Food Items</h1>
+<div class="products" id="suggestedBox"></div>
+
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script src="assets/app.js"></script>
+<script>
+const session = getSession();
+if (!session) {
+    alert('Please login first to order items.');
+    window.location.href = 'login.html';
+}
+
+let menu = [];
+
+/* STATE LOAD */
+async function loadState(){
+    let state = document.getElementById("stateSelect").value;
+    document.getElementById("title").innerText = state + " Foods";
+    
+    let box = document.getElementById("box");
+    box.innerHTML = "Loading...";
+
+    try {
+        const res = await fetch(`http://localhost:5000/api/menu/category/${state}`);
+        menu = await res.json();
+        render(state);
+    } catch (err) {
+        box.innerHTML = "Failed to load foods.";
+    }
+}
+
+async function loadSuggestedFoods() {
+    let suggestedBox = document.getElementById("suggestedBox");
+    suggestedBox.innerHTML = "Loading...";
+
+    try {
+        const res = await fetch(`http://localhost:5000/api/menu/category/Suggested`);
+        suggestedMenu = await res.json();
+        renderSuggested();
+    } catch (err) {
+        suggestedBox.innerHTML = "Failed to load suggested foods.";
+    }
+}
+
+function getFoodImageUrl(image) {
+    if (!image) {
+        return 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=500&q=80';
+    }
+
+    if (image.startsWith('http://') || image.startsWith('https://')) {
+        return image;
+    }
+
+    const normalized = image.replace(/\\/g, '/');
+    if (normalized.startsWith('/')) {
+        return `http://localhost:5000${normalized}`;
+    }
+
+    if (normalized.startsWith('uploads/')) {
+        return `http://localhost:5000/${normalized}`;
+    }
+
+    return `http://localhost:5000/${normalized}`;
+}
+
+/* RENDER */
+function render(state){
+    if(!state) state = document.getElementById("stateSelect").value;
+    
+    let search = document.getElementById("search").value.toLowerCase();
+    let box = document.getElementById("box");
+    box.innerHTML = "";
+
+    menu
+        .filter(f => String(f.name || '').trim().toLowerCase().includes(search))
+        .forEach(f => {
+            const itemName = String(f.name || '').trim();
+            const imageUrl = getFoodImageUrl(f.image);
+            box.innerHTML += `
+            <div class="card">
+                <img src="${imageUrl}" alt="${itemName}" loading="lazy">
+                <h3>${itemName}</h3>
+                <p>₹${f.price}</p>
+                <button onclick="addCart('${f._id}', ${f.price})">Add</button>
+            </div>
+            `;
+        });
+        
+    // Also re-render suggested foods when searching
+    if (typeof suggestedMenu !== 'undefined') {
+        renderSuggested();
+    }
+}
+
+function renderSuggested(){
+    let search = document.getElementById("search").value.toLowerCase();
+    let suggestedBox = document.getElementById("suggestedBox");
+    suggestedBox.innerHTML = "";
+
+    const filtered = suggestedMenu.filter(f => String(f.name || '').trim().toLowerCase().includes(search));
+    
+    if (filtered.length === 0) {
+        suggestedBox.innerHTML = "<p style='grid-column: 1/-1; text-align: center; color: #777;'>No suggested food items available yet.</p>";
+        return;
+    }
+
+    filtered.forEach(f => {
+        const itemName = String(f.name || '').trim();
+        const imageUrl = getFoodImageUrl(f.image);
+        suggestedBox.innerHTML += `
+        <div class="card" style="border: 1px solid #ff4b2b;">
+            <div style="position: absolute; top: 10px; left: 10px; background: #ff4b2b; color: white; font-size: 11px; padding: 4px 8px; border-radius: 6px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 10;">Suggested</div>
+            <img src="${imageUrl}" alt="${itemName}" loading="lazy">
+            <h3>${itemName}</h3>
+            <p>₹${f.price}</p>
+            <button onclick="addCart('${f._id}', ${f.price})">Add</button>
+        </div>
+        `;
+    });
+}
+
+async function addCart(foodId, price){
+    const session = getSession();
+    if (!session) {
+        alert("Please login first to order items.");
+        window.location.href = "login.html";
+        return;
+    }
+
+    try {
+        await addToCart(foodId, 1);
+        alert("Added to cart!");
+        await fhMountCartBadge();
+        
+        // Update live cart count explicitly if needed
+        const cart = await getCart();
+        document.getElementById("liveCartCount").innerText = cartCount(cart);
+    } catch(err) {
+        alert("Failed to add: " + err.message);
+    }
+}
+
+function setupLiveMenu() {
+    const socket = connectSocket();
+    if (!socket) return;
+
+    const reloadMenu = () => {
+        loadState();
+        loadSuggestedFoods();
+    };
+
+    socket.on("menu:new", reloadMenu);
+    socket.on("menu:updated", reloadMenu);
+    socket.on("menu:deleted", reloadMenu);
+    socket.on("cart:updated", async (cart) => {
+        document.getElementById("liveCartCount").innerText = cartCount(cart?.items || []);
+        await fhMountCartBadge();
+    });
+}
+
+/* INIT */
+window.onload = async () => {
+    document.getElementById("stateSelect").value = "Maharashtra";
+    loadState();
+    loadSuggestedFoods();
+    const cart = await getCart();
+    document.getElementById("liveCartCount").innerText = cartCount(cart);
+    setupLiveMenu();
+};
+</script>
+
+</body>
+</html>

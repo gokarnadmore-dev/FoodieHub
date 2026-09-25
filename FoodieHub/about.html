@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us - FoodieHub</title>
+
+<style>
+:root {
+    --bg-color: #fff7ed;
+    --primary: #ff512f;
+    --secondary: #f09819;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: var(--bg-color);
+}
+
+/* Header */
+header {
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    color: white;
+    padding: 15px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 10px;
+    font-weight: bold;
+}
+
+/* Container */
+.container {
+    padding: 30px;
+}
+
+/* Card */
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px #aaa;
+    max-width: 900px;
+    margin: auto;
+}
+
+/* Heading */
+h1 {
+    color: #ff512f;
+}
+
+/* List */
+ul {
+    margin-top: 10px;
+    padding-left: 20px;
+}
+
+ul li {
+    margin: 8px 0;
+}
+
+/* Footer */
+footer {
+    background: #222;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    margin-top: 40px;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+    <h2>🍔 FoodieHub</h2>
+    <nav>
+
+    <div class="menu">
+        <a href="index.html">Home</a>
+        <a href="menu.html">Menu</a>
+        <a href="suggest item.html">Suggest Item</a>
+        <a href="cart.html">Cart</a>
+        <a href="checkout.html">Checkout</a>
+        <a href="history.html">History</a>
+        <a href="feedback.html">Feedback</a>
+        <a href="about.html">About Us</a>
+        <a href="profile.html">Profile</a>
+        <a href="logout.html" onclick="logoutUser(); return false;">Logout</a>
+    </div>
+
+</nav>
+
+</header>
+
+<script src="assets/app.js"></script>
+
+<div class="container">
+
+    <div class="card">
+        <h1>About Us 🍕</h1>
+
+        <p>
+            Welcome to <b>FoodieHub</b>, your trusted online food ordering platform.
+            We make it easy for you to order delicious food from your favorite restaurants
+            with just a few clicks.
+        </p>
+
+        <p>
+            Our platform is designed to provide a smooth and enjoyable experience where
+            users can browse menus, add items to cart, and place orders quickly.
+        </p>
+
+        <h3>Why Choose Us?</h3>
+        <ul>
+            <li>Fast and simple ordering system</li>
+            <li>Wide variety of food choices</li>
+            <li>User-friendly interface</li>
+            <li>Secure checkout system</li>
+            <li>Quick delivery support</li>
+        </ul>
+
+        <p>
+            Our mission is to deliver happiness through food 🍽️ and make every order a great experience.
+        </p>
+    </div>
+
+</div>
+
+<footer>
+    © 2026 FoodieHub | All Rights Reserved
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Catering - FoodieHub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background: #f7f9fc;
+            color: #333;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 220px;
+            background-color: #ff6a19;
+            color: white;
+            padding: 20px 0;
+            flex-shrink: 0;
+        }
+
+        .sidebar h2 {
+            padding: 0 20px;
+            font-size: 1.25rem;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar ul li {
+            padding: 0;
+            margin: 4px 12px;
+            border-radius: 6px;
+        }
+
+        .sidebar ul li a {
+            display: block;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            padding: 12px 20px;
+            font-size: 0.9rem;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar ul li a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .sidebar ul li.active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar ul li.active a {
+            color: white;
+            border-left-color: white;
+            font-weight: 500;
+        }
+
+        /* MAIN */
+        .main {
+            flex-grow: 1;
+            padding: 25px 35px;
+            overflow-y: auto;
+        }
+
+        /* TOPBAR */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .topbar h2 {
+            font-size: 1.5rem;
+            color: #333;
+            font-weight: 700;
+        }
+
+        .live-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .live-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #2ecc71;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.6);
+            }
+
+            70% {
+                box-shadow: 0 0 0 8px rgba(46, 204, 113, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+            }
+        }
+
+        /* HERO */
+        .hero {
+            margin-top: 20px;
+            background: linear-gradient(135deg, #ff512f, #f09819);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .hero h1 {
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+
+        .hero p {
+            font-size: 14px;
+            opacity: 0.95;
+            max-width: 560px;
+            line-height: 1.5;
+        }
+
+        /* SECTION */
+        .section {
+            margin-top: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .section h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* PACKAGES */
+        .package-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+        }
+
+        .package-card {
+            border: 1px solid #eee;
+            border-radius: 14px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .package-card.selected {
+            border-color: #ff5722;
+            box-shadow: 0 0 0 2px rgba(255, 87, 34, 0.15);
+        }
+
+        .package-card .tag {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .package-card h3 {
+            color: #333;
+        }
+
+        .package-card .details {
+            font-size: 13px;
+            color: #777;
+            line-height: 1.4;
+            flex: 1;
+        }
+
+        .package-card .price {
+            font-weight: bold;
+            color: #ff5722;
+            font-size: 18px;
+        }
+
+        .btn {
+            padding: 10px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .select-btn {
+            background: #fff3e9;
+            color: #ff5722;
+        }
+
+        .select-btn.active {
+            background: #ff5722;
+            color: white;
+        }
+
+        .select-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* FORM */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field label {
+            font-size: 13px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .field textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        .selected-package-note {
+            font-size: 13px;
+            color: #555;
+            background: #fff3e9;
+            border: 1px solid #ffd9c2;
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+
+        .submit-row {
+            margin-top: 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .submit-btn {
+            background: #ff5722;
+            color: white;
+        }
+
+        .submit-btn:hover {
+            background: black;
+        }
+
+        .form-msg {
+            font-size: 13px;
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        /* TABLE */
+        table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f4f6f9;
+            color: #555;
+        }
+
+        .empty-msg {
+            color: #999;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .status-pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            background: #fff3cd;
+            color: #946c00;
+        }
+
+        .status-pill.Confirmed {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-pill.Completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pill.Cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .cancel-link {
+            color: #e74c3c;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <ul>
+            <li><a href="admindashbord.html">Dashboard</a></li>
+            <li><a href="users.html">Users</a></li>
+            <li><a href="orders.html">Orders</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li class="active"><a href="admindashbordcatering.html">Catering</a></li>
+            <li><a href="login.html" onclick="logoutUser(); return false;">Logout</a></li>
+        </ul>
+    </div>
+
+    <div class="main">
+        <div class="topbar">
+            <h2>Catering</h2>
+            <div class="live-badge"><span class="live-dot"></span> Live — synced across all pages</div>
+        </div>
+
+        <div class="hero">
+            <h1>Feeding your next event, done right</h1>
+            <p>Pick a package below, tell us about your event, and our team will confirm your quote. Perfect for
+                office parties, weddings, birthdays, and everything in between.</p>
+        </div>
+
+        <!-- Packages -->
+        <div class="section">
+            <h2>Catering Packages</h2>
+            <div class="package-grid" id="packageGrid"></div>
+        </div>
+
+        <!-- Request form -->
+        <div class="section">
+            <h2>Request a Quote</h2>
+            <div id="selectedPackageNote" class="selected-package-note" style="display:none; margin-bottom: 16px;">
+            </div>
+            <form id="cateringForm">
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="eventType">Event type</label>
+                        <select id="eventType" required>
+                            <option value="">Select event type</option>
+                            <option>Birthday Party</option>
+                            <option>Wedding</option>
+                            <option>Corporate Event</option>
+                            <option>Family Gathering</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="eventDate">Event date</label>
+                        <input type="date" id="eventDate" required />
+                    </div>
+                    <div class="field">
+                        <label for="guestCount">Number of guests</label>
+                        <input type="number" id="guestCount" min="1" placeholder="e.g. 50" required />
+                    </div>
+                    <div class="field">
+                        <label for="contactName">Your name</label>
+                        <input type="text" id="contactName" placeholder="Full name" required />
+                    </div>
+                    <div class="field">
+                        <label for="contactPhone">Phone number</label>
+                        <input type="tel" id="contactPhone" placeholder="e.g. 98765 43210" required />
+                    </div>
+                    <div class="field">
+                        <label for="eventLocation">Event location</label>
+                        <input type="text" id="eventLocation" placeholder="City / venue" required />
+                    </div>
+                    <div class="field full">
+                        <label for="notes">Additional notes</label>
+                        <textarea id="notes" placeholder="Dietary restrictions, timing, special requests..."></textarea>
+                    </div>
+                </div>
+                <div class="submit-row">
+                    <button type="submit" class="btn submit-btn">Submit Request</button>
+                    <span class="form-msg" id="formMsg" style="display:none;">Request submitted! We'll be in touch
+                        soon.</span>
+                </div>
+            </form>
+        </div>
+
+        <!-- Request history -->
+        <div class="section">
+            <h2>My Catering Requests</h2>
+            <table id="requestsTable">
+                <thead>
+                    <tr>
+                        <th>Request ID</th>
+                        <th>Package</th>
+                        <th>Event</th>
+                        <th>Guests</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="requestsBody"></tbody>
+            </table>
+            <div class="empty-msg" id="requestsEmpty" style="display:none;">No catering requests yet.</div>
+        </div>
+    </div>
+
+    <script src="assets/app.js"></script>
+    <script>
+        /* ==========================================================
+           Page-specific UI logic — the data layer (getCateringPackages,
+           addCateringRequest, onCateringRequestsChanged, etc.) now
+           lives once in assets/app.js and is shared by every page.
+           ========================================================== */
+
+        const session = requireLogin();
+        if (!session) {
+            window.location.href = "login.html";
+        }
+        let selectedPackage = null;
+
+        const packageGrid = document.getElementById("packageGrid");
+        const selectedPackageNote = document.getElementById("selectedPackageNote");
+        const requestsBody = document.getElementById("requestsBody");
+        const requestsEmpty = document.getElementById("requestsEmpty");
+        const cateringForm = document.getElementById("cateringForm");
+        const formMsg = document.getElementById("formMsg");
+
+        function renderPackages(packages) {
+            packageGrid.innerHTML = packages.map(p => `
+                <div class="package-card ${selectedPackage === p.id ? 'selected' : ''}">
+                    <span class="tag">${p.tag}</span>
+                    <h3>${p.name}</h3>
+                    <span class="details">${p.details}</span>
+                    <span class="price">₹${p.price}</span>
+                    <button type="button" class="btn select-btn ${selectedPackage === p.id ? 'active' : ''}" data-id="${p.id}">
+                        ${selectedPackage === p.id ? 'Selected' : 'Select Package'}
+                    </button>
+                </div>
+            `).join("");
+
+            packageGrid.querySelectorAll(".select-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const id = btn.getAttribute("data-id");
+                    selectedPackage = selectedPackage === id ? null : id;
+                    renderPackages(packages);
+                    updateSelectedNote(packages);
+                });
+            });
+        }
+
+        function updateSelectedNote(packages) {
+            if (!selectedPackage) {
+                selectedPackageNote.style.display = "none";
+                return;
+            }
+            const pkg = packages.find(p => p.id === selectedPackage);
+            if (!pkg) return;
+            selectedPackageNote.style.display = "block";
+            selectedPackageNote.textContent = `Selected package: ${pkg.name} (₹${pkg.price}) — this will be attached to your request.`;
+        }
+
+        /* ---- Init ---- */
+        
+        async function loadCateringData() {
+            const packages = await getCateringPackages();
+            renderPackages(packages);
+            updateSelectedNote(packages);
+
+            const myRequests = await getMyCateringRequests();
+            renderRequests(myRequests);
+        }
+
+        window.onload = () => {
+            loadCateringData();
+            const socket = connectSocket();
+            if (!socket) return;
+
+            socket.on("catering:new", () => {
+                loadCateringData();
+            });
+
+            socket.on("catering:updated", () => {
+                loadCateringData();
+            });
+        };
+
+        // Ensure we hook into the form submit with async
+        cateringForm.onsubmit = async (e) => {
+            e.preventDefault();
+
+            const packages = await getCateringPackages();
+            const pkg = packages.find(p => p.id === selectedPackage);
+
+            const request = {
+                packageId: selectedPackage,
+                packageName: pkg ? pkg.name : "",
+                eventType: document.getElementById("eventType").value,
+                eventDate: document.getElementById("eventDate").value,
+                guestCount: document.getElementById("guestCount").value,
+                contactName: document.getElementById("contactName").value,
+                contactPhone: document.getElementById("contactPhone").value,
+                eventLocation: document.getElementById("eventLocation").value,
+                notes: document.getElementById("notes").value,
+            };
+
+            await addCateringRequest(request);
+
+            cateringForm.reset();
+            selectedPackage = null;
+            await loadCateringData();
+
+            formMsg.style.display = "inline";
+            setTimeout(() => { formMsg.style.display = "none"; }, 4000);
+        };
+
+        async function handleCancelRequest(id) {
+            if (confirm("Are you sure you want to cancel this request?")) {
+                await cancelCateringRequest(id);
+                await loadCateringData();
+            }
+        }
+
+        // We override renderRequests cancel button click to use async handler
+        function renderRequests(requests) {
+            if (requests.length === 0) {
+                requestsBody.innerHTML = "";
+                requestsEmpty.style.display = "block";
+                return;
+            }
+            requestsEmpty.style.display = "none";
+            requestsBody.innerHTML = requests.map(r => `
+                <tr>
+                    <td>#${r._id.slice(-6)}</td>
+                    <td>${r.packageName || "Custom"}</td>
+                    <td>${r.eventType}</td>
+                    <td>${r.guestCount}</td>
+                    <td>${r.eventDate}</td>
+                    <td><span class="status-pill ${r.status.replace(/\s/g, '-')}">${r.status}</span></td>
+                    <td>${r.status === "Pending" ? `<button class="cancel-link" onclick="handleCancelRequest('${r._id}')">Cancel</button>` : ""}</td>
+                </tr>
+            `).join("");
+        }
+
+    </script>
+
+</body>
+
+</html>
